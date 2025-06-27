@@ -1,8 +1,8 @@
-import 'dart:io';
+import 'dart:typed_data';
+import 'dart:convert' show utf8;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:csv/csv.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../models/project_model.dart';
@@ -23,10 +23,13 @@ class ExportUtils {
     }
 
     final csvData = const ListToCsvConverter().convert(rows);
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/earnings.csv');
-    await file.writeAsString(csvData);
-    await Printing.sharePdf(bytes: await file.readAsBytes(), filename: 'earnings.csv');
+
+    final bytes = Uint8List.fromList(utf8.encode(csvData));
+
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename: 'earnings.csv',
+    );
   }
 
   static Future<void> exportEarningsToPDF(List<ProjectModel> projects) async {
