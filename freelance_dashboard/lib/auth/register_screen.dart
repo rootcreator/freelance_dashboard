@@ -13,17 +13,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool isLoading = false;
+  String? error;
 
   void register(BuildContext context) async {
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+
     try {
-      await Provider.of<AuthService>(context, listen: false)
-          .register(emailController.text, passwordController.text);
+      await Provider.of<AuthService>(context, listen: false).register(
+        emailController.text,
+        passwordController.text,
+      );
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registration failed: $e')));
+      setState(() => error = 'Registration failed: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error!)),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
-    setState(() => isLoading = false);
   }
 
   @override
@@ -33,37 +44,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email')),
-            TextField(controller: passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'Password')),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'Password'),
+            ),
             const SizedBox(height: 20),
+            if (error != null)
+              Text(error!, style: const TextStyle(color: Colors.red)),
+            const SizedBox(height: 10),
             isLoading
-                ? const CircularProgressIndicator()
+                ? const Center(child: CircularProgressIndicator())
                 : ElevatedButton(
-                    onPressed: () => register(context), child: const Text('Register')),
+                    onPressed: () => register(context),
+                    child: const Text('Register'),
+                  ),
           ],
         ),
       ),
     );
   }
 }
-
-bool loading = false;
-String? error;
-
-...
-
-ElevatedButton(
-  onPressed: () async {
-    setState(() => loading = true);
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(...);
-    } catch (e) {
-      setState(() => error = e.toString());
-    } finally {
-      setState(() => loading = false);
-    }
-  },
-  child: loading ? CircularProgressIndicator() : Text("Login"),
-),
-if (error != null) Text(error!, style: TextStyle(color: Colors.red)),
