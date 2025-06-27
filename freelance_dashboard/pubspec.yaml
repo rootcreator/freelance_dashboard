@@ -22,11 +22,11 @@ dependencies:
   intl: ^0.20.2                   # Internationalization
   csv: ^6.0.0                     # CSV encoding/decoding :contentReference[oaicite:2]{index=2}
   printing: ^5.11.0               # Print & PDF rendering
-  pdf: ^3.10.4                    # PDF creator
-  shared_preferences: ^2.1.2      # Key-value storage
+  pdf: ^3.11.3                    # PDF creator
+  shared_preferences: ^2.5.3      # Key-value storage
   flutter_switch: ^0.3.2          # iOS-style switches
-  charts_flutter: ^0.12.0         # Chart widgets
-  path_provider: ^2.0.11          # Filesystem paths
+  charts_flutter: ^0.5.2         # Chart widgets
+  path_provider: ^2.1.5        # Filesystem paths
   share_plus: ^4.0.10             # Cross-platform sharing
   flutter_hooks: ^0.18.5          # Flutter Hooks
   flutter_pdfview: ^1.4.1+1       # Native PDF viewer :contentReference[oaicite:3]{index=3}
