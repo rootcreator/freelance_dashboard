@@ -26,7 +26,7 @@ dependencies:
   shared_preferences: ^2.5.3      # Key-value storage
   flutter_switch: ^0.3.2          # iOS-style switches
   #charts_flutter: ^0.5.2         # Chart widgets
-  path_provider: ^2.1.5        # Filesystem paths
+  #path_provider: ^2.1.5        # Filesystem paths
   share_plus: ^11.0.0             # Cross-platform sharing
   flutter_hooks: ^0.21.2          # Flutter Hooks
   flutter_pdfview: ^1.4.1+1       # Native PDF viewer :contentReference[oaicite:3]{index=3}
