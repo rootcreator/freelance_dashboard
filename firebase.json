@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "freelance-dashboard-41096",
+          "appId": "1:76039526935:android:2c5e64308783396f441a52",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "freelance-dashboard-41096",
+          "configurations": {
+            "android": "1:76039526935:android:2c5e64308783396f441a52",
+            "ios": "1:76039526935:ios:18117b60800ca67d441a52",
+            "macos": "1:76039526935:ios:18117b60800ca67d441a52",
+            "web": "1:76039526935:web:c8534744c7e48966441a52",
+            "windows": "1:76039526935:web:8219be23028f3df2441a52"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

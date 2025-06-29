@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:fl_chart/fl_chart.dart';
 import '../models/project_model.dart';
+import '../utils/export_utils.dart';
 
 class EarningsScreen extends StatefulWidget {
   const EarningsScreen({super.key});
@@ -51,19 +52,37 @@ class _EarningsScreenState extends State<EarningsScreen> {
               const SizedBox(height: 20),
               SizedBox(
                 height: 250,
-                child: charts.BarChart(
-                  [
-                    charts.Series<_EarningsData, String>(
-                      id: 'Earnings',
-                      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-                      domainFn: (e, _) => e.month,
-                      measureFn: (e, _) => e.amount,
-                      data: chartData,
-                    )
-                  ],
-                  animate: true,
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    borderData: FlBorderData(show: false),
+                    titlesData: FlTitlesData(
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, _) {
+                            final month = chartData[value.toInt()].month;
+                            return Text(month.substring(0, 1)); // Show 'J' for Jan, etc.
+                          },
+                          reservedSize: 28,
+                        ),
+                      ),
+                      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    ),
+                    barGroups: List.generate(12, (i) {
+                      return BarChartGroupData(
+                        x: i,
+                        barRods: [
+                          BarChartRodData(toY: chartData[i].amount, color: Colors.blue),
+                        ],
+                      );
+                    }),
+                  ),
                 ),
               ),
+
               const SizedBox(height: 30),
               DropdownButtonFormField<int>(
                 value: selectedYear,

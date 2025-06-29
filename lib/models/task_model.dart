@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class TaskModel {
   final String id;
   final String title;
   final String status; // 'Pending', 'In Progress', 'Completed'
   final String? projectId;
   final DateTime createdAt;
+  final String? description;
 
   TaskModel({
     required this.id,
@@ -11,6 +14,7 @@ class TaskModel {
     required this.status,
     this.projectId,
     required this.createdAt,
+    this.description,
   });
 
   factory TaskModel.fromMap(Map<String, dynamic> data, String id) {
@@ -20,6 +24,7 @@ class TaskModel {
       status: data['status'] ?? 'Pending',
       projectId: data['projectId'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
+      description: data['description'],
     );
   }
 
@@ -29,6 +34,7 @@ class TaskModel {
       'status': status,
       'projectId': projectId,
       'createdAt': createdAt,
+      'description': description,
     };
   }
 }

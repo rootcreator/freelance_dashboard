@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ActivityModel {
   final String id;
   final String type; // e.g. "Task", "Project", "Invoice"

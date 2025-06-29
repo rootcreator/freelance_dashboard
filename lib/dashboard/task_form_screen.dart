@@ -15,6 +15,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _title = TextEditingController();
   String _status = 'Pending';
+
   final List<String> statusOptions = ['Pending', 'In Progress', 'Completed'];
 
   @override
@@ -32,7 +33,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         id: widget.task?.id ?? '',
         title: _title.text,
         status: _status,
-        projectId: null, // optional project link
+        projectId: null, // Optional project link
         createdAt: widget.task?.createdAt ?? DateTime.now(),
       );
 
@@ -40,10 +41,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
       if (widget.task == null) {
         await ref.add(task.toMap());
+        // Add log here if needed, e.g.
+        // await addActivityLog("Task", "Task '${task.title}' created.");
       } else {
         await ref.doc(task.id).update(task.toMap());
-      } else {
-        await addActivityLog("Task", "Task '${task.title}' created.");
       }
 
       Navigator.pop(context);
@@ -55,22 +56,33 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     final isEdit = widget.task != null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(isEdit ? 'Edit Task' : 'New Task')),
+      appBar: AppBar(
+        title: Text(isEdit ? 'Edit Task' : 'New Task'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(controller: _title, decoration: const InputDecoration(labelText: 'Task Title'), validator: (v) => v!.isEmpty ? 'Required' : null),
+              TextFormField(
+                controller: _title,
+                decoration: const InputDecoration(labelText: 'Task Title'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
               DropdownButtonFormField<String>(
                 value: _status,
-                items: statusOptions.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                items: statusOptions
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
                 onChanged: (val) => setState(() => _status = val!),
                 decoration: const InputDecoration(labelText: 'Status'),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(onPressed: save, child: Text(isEdit ? 'Update Task' : 'Add Task')),
+              ElevatedButton(
+                onPressed: save,
+                child: Text(isEdit ? 'Update Task' : 'Add Task'),
+              ),
             ],
           ),
         ),

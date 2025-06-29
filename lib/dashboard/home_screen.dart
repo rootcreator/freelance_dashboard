@@ -13,7 +13,6 @@ class HomeScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
@@ -40,19 +39,46 @@ class HomeScreen extends StatelessWidget {
         FirebaseFirestore.instance.collection('projects').where('status', isEqualTo: 'Completed').get(),
       ]),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const CircularProgressIndicator();
+        if (!snapshot.hasData) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(3, (_) => const Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Card(child: SizedBox(height: 80)),
+              ),
+            )),
+          );
+        }
 
-        final projects = snapshot.data![0].docs.length;
-        final tasks = snapshot.data![1].docs.length;
-        final completed = snapshot.data![2].docs.fold<double>(0, (sum, doc) => sum + (doc['budget'] ?? 0));
+        final allProjectDocs = snapshot.data![0].docs;
+        final taskDocs = snapshot.data![1].docs;
+        final completedProjectDocs = snapshot.data![2].docs;
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _StatCard(label: 'Projects', value: projects.toString(), icon: Icons.work),
-            _StatCard(label: 'Tasks', value: tasks.toString(), icon: Icons.check_circle),
-            _StatCard(label: 'Earnings', value: "\$${completed.toStringAsFixed(0)}", icon: Icons.attach_money),
-          ],
+        final projects = allProjectDocs
+            .map((doc) => ProjectModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+            .toList();
+
+        final completedProjects = completedProjectDocs
+            .map((doc) => ProjectModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+            .toList();
+
+        final totalEarnings = completedProjects.fold<double>(
+          0,
+              (sum, project) => sum + project.budget,
+        );
+
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          child: Row(
+            key: ValueKey('${projects.length}${taskDocs.length}$totalEarnings'),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _StatCard(label: 'Projects', value: projects.length.toString(), icon: Icons.work),
+              _StatCard(label: 'Tasks', value: taskDocs.length.toString(), icon: Icons.check_circle),
+              _StatCard(label: 'Earnings', value: "\$${totalEarnings.toStringAsFixed(0)}", icon: Icons.attach_money),
+            ],
+          ),
         );
       },
     );
@@ -66,25 +92,58 @@ class HomeScreen extends StatelessWidget {
           .limit(5)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text("Recent Tasks", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              CircularProgressIndicator(),
+            ],
+          );
+        }
 
-        final tasks = snapshot.data!.docs.map((doc) => TaskModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList();
+        final tasks = snapshot.data!.docs
+            .map((doc) => TaskModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+            .toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text("Recent Tasks", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            ...tasks.map((task) => ListTile(
-              leading: const Icon(Icons.task_alt),
-              title: Text(task.title),
-              subtitle: Text("Status: ${task.status} • ${DateFormat.yMd().format(task.createdAt)}"),
-            )),
+            ...tasks.asMap().entries.map((entry) {
+              final index = entry.key;
+              final task = entry.value;
+
+              return TweenAnimationBuilder(
+                duration: Duration(milliseconds: 300 + (index * 100)),
+                tween: Tween<double>(begin: 0, end: 1),
+                builder: (context, value, child) => Opacity(
+                  opacity: value,
+                  child: Transform.translate(offset: Offset(0, (1 - value) * 20), child: child),
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.task_alt),
+                  title: Text(task.title),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Status: ${task.status} • ${DateFormat.yMd().format(task.createdAt)}"),
+                      if (task.description != null && task.description!.isNotEmpty)
+                        Text(task.description!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
+
+                ),
+              );
+            }),
           ],
         );
       },
     );
   }
+
 }
 
 class _StatCard extends StatelessWidget {

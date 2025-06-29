@@ -1,10 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/project_model.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
-
+import '../models/project_model.dart';
 
 class ProjectFormScreen extends StatefulWidget {
   final ProjectModel? project;
@@ -56,10 +55,9 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
 
       if (widget.project == null) {
         await ref.add(project.toMap());
+        // You can add activity log here if needed
       } else {
         await ref.doc(project.id).update(project.toMap());
-      } else {
-        await addActivityLog("Task", "Task '${task.title}' created.");
       }
 
       Navigator.pop(context);
@@ -67,14 +65,15 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
   }
 
   Future<void> uploadAttachment(String projectId) async {
-  final result = await FilePicker.platform.pickFiles();
-  if (result != null && result.files.single.path != null) {
-    final path = result.files.single.path!;
-    final fileName = result.files.single.name;
-    final ref = FirebaseStorage.instance.ref('attachments/$projectId/$fileName');
-    await ref.putFile(File(path));
+    final result = await FilePicker.platform.pickFiles();
+    if (result != null && result.files.single.path != null) {
+      final path = result.files.single.path!;
+      final fileName = result.files.single.name;
+      final ref =
+      FirebaseStorage.instance.ref('attachments/$projectId/$fileName');
+      await ref.putFile(File(path));
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -88,12 +87,27 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(controller: _title, decoration: const InputDecoration(labelText: 'Project Title'), validator: (v) => v!.isEmpty ? 'Required' : null),
-              TextFormField(controller: _client, decoration: const InputDecoration(labelText: 'Client Name'), validator: (v) => v!.isEmpty ? 'Required' : null),
-              TextFormField(controller: _budget, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Budget'), validator: (v) => v!.isEmpty ? 'Required' : null),
+              TextFormField(
+                controller: _title,
+                decoration: const InputDecoration(labelText: 'Project Title'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: _client,
+                decoration: const InputDecoration(labelText: 'Client Name'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: _budget,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Budget'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
               DropdownButtonFormField<String>(
                 value: _status,
-                items: statusOptions.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                items: statusOptions
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
                 onChanged: (val) => setState(() => _status = val!),
                 decoration: const InputDecoration(labelText: 'Status'),
               ),
@@ -102,13 +116,31 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                 subtitle: Text("${_deadline.toLocal()}".split(' ')[0]),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
-                  final picked = await showDatePicker(context: context, initialDate: _deadline, firstDate: DateTime.now().subtract(const Duration(days: 365)), lastDate: DateTime(2100));
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _deadline,
+                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    lastDate: DateTime(2100),
+                  );
                   if (picked != null) setState(() => _deadline = picked);
                 },
               ),
-              TextFormField(controller: _notes, maxLines: 3, decoration: const InputDecoration(labelText: 'Notes')),
+              TextFormField(
+                controller: _notes,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Notes'),
+              ),
               const SizedBox(height: 20),
-              ElevatedButton(onPressed: saveProject, child: Text(isEdit ? 'Update Project' : 'Add Project')),
+              ElevatedButton(
+                onPressed: saveProject,
+                child: Text(isEdit ? 'Update Project' : 'Add Project'),
+              ),
+              if (isEdit)
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.upload_file),
+                  label: const Text("Upload Attachment"),
+                  onPressed: () => uploadAttachment(widget.project!.id),
+                ),
             ],
           ),
         ),

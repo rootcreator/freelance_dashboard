@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'profile_screen.dart';
 import 'projects_screen.dart';
 import 'tasks_screen.dart';
 import 'earnings_screen.dart';
@@ -30,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     'Tasks',
     'Earnings',
     'Messages',
-    'Profile',
+    'Profile & Settings',
   ];
 
   @override
